@@ -1,0 +1,54 @@
+plugins {
+    id "idea"
+    id "java"
+    id "application"
+    id "antlr"
+}
+
+group = 'org.lflang'
+version = '0.1.0'
+sourceCompatibility = 1.8
+mainClassName = 'example.antlr.Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    antlr 'org.antlr:antlr4:4.7.2'
+
+    implementation 'org.antlr:antlr4-runtime:4.7.2'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+}
+
+// Antlr
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += [ "-visitor", 
+                   "-long-messages",
+                   "-package", "example.antlr" ]
+    outputDirectory = file("${projectDir}/src/generated/java")
+}
+
+clean {
+    delete file("${projectDir}/src/generated")
+}
+
+sourceSets {
+    generated{
+        java.srcDir "${projectDir}/src/generated/java/"
+    }
+
+    main {
+        java.srcDirs += "${projectDir}/src/generated/java/"
+    }
+}
+
+// Intellij
+idea {
+    module {
+        sourceDirs += file("${projectDir}/src/generated/java")
+        generatedSourceDirs += file("${projectDir}/src/generated/java")
+    }
+}
