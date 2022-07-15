@@ -9,6 +9,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import example.antlr.CParser.BlockItemListContext;
+import example.antlr.ast.ASTNode;
+
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
@@ -20,10 +23,9 @@ public class Main {
         
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CParser parser = new CParser(tokens);
-            ParseTree parseTree = parser.blockItem();
-
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(new MyListener(), parseTree);
+            BlockItemListContext parseTree = parser.blockItemList();
+            BuildAstVisitor visitor = new BuildAstVisitor();
+            ASTNode ast = visitor.visitBlockItemList(parseTree);
         } catch (IOException e) {
             System.out.println(e);
         }

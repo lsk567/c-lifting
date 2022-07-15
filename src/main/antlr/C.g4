@@ -440,6 +440,7 @@ blockItemList
     :   blockItem+
     ;
 
+// Reaction body is a blockItem.
 blockItem
     :   statement
     |   declaration
