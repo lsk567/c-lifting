@@ -1,7 +1,7 @@
+int i = 0;
 if (1 < 2) {
-	int i = 0;
 	i += 1;
-	return i;
+	set(out, i);
 } else {
-	return 0;
+	set(out, 0);
 }
