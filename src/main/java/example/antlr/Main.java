@@ -19,7 +19,7 @@ public class Main {
         LOG.info("Running the example...");
 
         try {
-            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/if.c"));
+            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/decls.c"));
         
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CParser parser = new CParser(tokens);

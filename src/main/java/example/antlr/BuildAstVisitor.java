@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import example.antlr.CParser.BlockItemContext;
 import example.antlr.CParser.DeclarationSpecifierContext;
+import example.antlr.CParser.DeclaratorContext;
+import example.antlr.CParser.DirectDeclaratorContext;
 import example.antlr.CParser.InitDeclaratorContext;
+import example.antlr.CParser.PrimaryExpressionContext;
 import example.antlr.ast.*;
 import example.antlr.ast.VariableNode.Type;
 
@@ -26,7 +29,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
             stmtSeq.children.add(visit(blockItem));
         }
 
-        System.out.println(stmtSeq);
+        System.out.println(stmtSeq.children);
 
         return stmtSeq;
     }
@@ -54,7 +57,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
                     "Warning (line " + ctx.getStart().getLine() + "):",
                     "the analyzer cannot handle more than 1 specifiers,",
                     "e.g. static const int.",
-                    "A conservative strategy is taken."
+                    "Marking the declaration as opaque."
                 ));
                 return new OpaqueNode();
             }
@@ -66,7 +69,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
                     "Warning (line " + ctx.getStart().getLine() + "):",
                     "only type specifiers are supported.",
                     "e.g. \"static const int\" is not analyzable.",
-                    "A conservative strategy is taken."
+                    "Marking the declaration as opaque."
                 ));
                 return new OpaqueNode();
             }
@@ -91,7 +94,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
                     "Warning (line " + ctx.getStart().getLine() + "):",
                     "unsupported type detected at " + declSpec.typeSpecifier(),
                     "Only " + supportedTypes + " are supported.",
-                    "A conservative strategy is taken."
+                    "Marking the declaration as opaque."
                 ));
                 return new OpaqueNode();
             }
@@ -105,19 +108,120 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
             if (initDeclList.size() > 1) {
                 System.out.println(String.join(" ", 
                     "Warning (line " + ctx.getStart().getLine() + "):",
-                    "unsupported type detected at " + declSpec.typeSpecifier(),
-                    "Only " + supportedTypes + " are supported.",
-                    "A conservative strategy is taken."
+                    "more than 1 declarators are detected on a single line,",
+                    "e.g. \"int x = 1, y = 2;\" is not yet analyzable.",
+                    "Marking the declaration as opaque."
                 ));
                 return new OpaqueNode();
             }
 
-            // Make sure that there is an initializer
-            String name; 
+            // Get the variable name from the declarator.
+            DeclaratorContext decl = initDeclList.get(0).declarator();
+            if (decl.pointer() != null) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "pointers are currently not supported,",
+                    "e.g. \"int *x;\" is not yet analyzable.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+            if (decl.gccDeclaratorExtension().size() > 0) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "GCC declarator extensions are currently not supported,",
+                    "e.g. \"__asm\" and \"__attribute__\" are not yet analyzable.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+            DirectDeclaratorContext directDecl = decl.directDeclarator();
+            if (directDecl.Identifier() == null) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "the variable identifier is missing.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+
+            // Extract the name of the variable.
+            String name = directDecl.Identifier().getText();             
+            // Create a variable AST node.
+            VariableNode variable = new VariableNode(type, name);
 
 
-            // If initializer does not exist.
-            // return new UninitVariableNode(type, name);
+            //// Convert the initializer to a value.
+
+            // Make sure that there is an initializer.
+            InitDeclaratorContext initDecl = initDeclList.get(0);
+            if (initDecl.initializer() == null) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "the initializer is missing,",
+                    "e.g. \"int x;\" is not yet analyzable.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+
+                // FIXME: Use UninitVariableNode to perform special encoding.
+                // return new UninitVariableNode(type, name);
+            }
+
+            // Extract the primaryExpression from the initializer.
+            if (initDecl.initializer().assignmentExpression() == null
+                || initDecl.initializer().assignmentExpression()
+                    .conditionalExpression() == null) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "assignmentExpression or conditionalExpression is missing.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+
+            PrimaryExpressionContext primaryExpr;
+            ASTNode initializerNode;
+            try {
+                // FIXME: This is cutting some corners with interpreting
+                // the program. Currently, inline arithmetic operations
+                // will not be handled and have no warnings at all.
+                // This part needs more work.
+                primaryExpr = initDecl.initializer().assignmentExpression()
+                                .conditionalExpression().logicalOrExpression()
+                                .logicalAndExpression(0).inclusiveOrExpression(0)
+                                .exclusiveOrExpression(0).andExpression(0)
+                                .equalityExpression(0).relationalExpression(0)
+                                .shiftExpression(0).additiveExpression(0)
+                                .multiplicativeExpression(0).castExpression(0)
+                                .unaryExpression().postfixExpression()
+                                .primaryExpression();
+            } catch (NullPointerException e) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "unable to extract a primary expression from the initializer.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+            if (primaryExpr.Identifier() != null) {
+                initializerNode = new VariableNode(primaryExpr.Identifier().getText());
+            } else if (primaryExpr.Constant() != null) {
+                initializerNode = new ConstantNode(primaryExpr.Constant().getText());
+            } else {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "only identifier and constant are supported on the RHS of the declaration.",
+                    "Marking the declaration as opaque."
+                ));
+                return new OpaqueNode();
+            }
+
+            // Finally return the assignment node.
+            AssignmentNode assignmentNode = new AssignmentNode();
+            assignmentNode.left = variable;
+            assignmentNode.right = initializerNode;
+            return assignmentNode;
         }
         // Return OpaqueNode as default.
         return new OpaqueNode();
