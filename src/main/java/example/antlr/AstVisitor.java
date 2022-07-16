@@ -12,13 +12,4 @@ public interface AstVisitor<T> {
 	 * @return The result of visiting the parse tree.
      */
     T visit(AstNode tree);
-
-    /**
-	 * Visit the children of a node, and return a user-defined result of the
-	 * operation.
-	 *
-	 * @param node The {@link AstNode} whose children should be visited.
-	 * @return The result of visiting the children of the node.
-	 */
-	T visitChildren(AstNode node);
 }
