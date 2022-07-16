@@ -1,5 +1,8 @@
 package example.antlr.ast;
 
+import example.antlr.AstVisitor;
+import example.antlr.CAstVisitor;
+
 public class VariableNode extends AstNode {
 
     public enum Type {
@@ -19,5 +22,10 @@ public class VariableNode extends AstNode {
         super();
         this.type = type;
         this.name = name;
+    }
+
+    @Override
+    public <T> T accept(AstVisitor<? extends T> visitor) {
+        return ((CAstVisitor<? extends T>)visitor).visitVariableNode(this);
     }
 }
