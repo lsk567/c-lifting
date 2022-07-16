@@ -1,6 +1,8 @@
 package example.antlr;
 
-import example.antlr.ast.AstNode;
+import java.util.List;
+
+import example.antlr.ast.*;
 
 /**
  * An AST visitor that converts an original AST into the If Normal Form.
@@ -22,6 +24,63 @@ import example.antlr.ast.AstNode;
  *    that each variable has a unique name.
  *    E.g. "{ int i = 0; }{ int i = 0; }" is an ill-formed program.
  */
-public class IfNormalFormAstVisitor extends CBaseAstVisitor<AstNode> {
+public class IfNormalFormAstVisitor extends CBaseAstVisitor<Void> {
+
+    public StatementSequenceNode INF = new StatementSequenceNode();
     
+    @Override
+    public Void visitStatementSequenceNode(StatementSequenceNode node, List<AstNode> conditions) {
+        // Create a new StatementSequenceNode.        
+        for (AstNode child : node.children) {
+            visit(child, conditions);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAssignmentNode(AssignmentNode node, List<AstNode> conditions) {
+        IfBlockNode ifNode = new IfBlockNode();
+
+        // Set the condition of the if block node.
+        AstNode conjunction = takeConjunction(conditions);
+        ifNode.setCondition(conjunction);
+
+        // Create a new body node.
+        IfBodyNode body = new IfBodyNode();
+        ifNode.right = body;
+
+        // Set the then branch to the assignment.
+        body.left = node;
+
+        // Set the else branch to an EMPTY ast node.
+        body.right = new AstNode();
+
+        // Add the body to the INF node.
+        this.INF.children.add(ifNode);
+
+        System.out.println("Add a new IfNode: " + ifNode);
+        return null;
+    }
+
+    private AstNode takeConjunction(List<AstNode> conditions) {
+        if (conditions.size() == 0) {
+            return new LiteralNode("true");
+        } else if (conditions.size() == 0) {
+            return conditions.get(0);
+        } else {
+            // Take the conjunction of all the conditions.
+            LogicalAndNode top = new LogicalAndNode();
+            LogicalAndNode cur = top;
+            for (int i = 0; i < conditions.size()-1; i++) {
+                cur.left = conditions.get(i);
+                if (i == conditions.size()-2) {
+                    cur.right = conditions.get(i+1);
+                } else {
+                    cur.right = new LogicalAndNode();
+                    cur =(LogicalAndNode)cur.right;
+                }
+            }
+            return top;
+        }
+    }
 }

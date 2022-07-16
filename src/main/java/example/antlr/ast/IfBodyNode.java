@@ -6,18 +6,19 @@ import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
 
 /**
- * An Ast node that indicates the code
- * represented by this node is unanalyzable.
+ * AST node for an if block.
+ * The left node is the then branch.
+ * The right node is the else branch.
  */
-public class OpaqueNode extends AstNode {
+public class IfBodyNode extends AstNodeBinary {
     
     @Override
     public <T> T accept(AstVisitor<? extends T> visitor) {
-        return ((CAstVisitor<? extends T>)visitor).visitOpaqueNode(this);
+        return ((CAstVisitor<? extends T>)visitor).visitIfBodyNode(this);
     }
 
     @Override
     public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
-        return ((CAstVisitor<? extends T>)visitor).visitOpaqueNode(this, nodeList);
+        return ((CAstVisitor<? extends T>)visitor).visitIfBodyNode(this, nodeList);
     }
 }

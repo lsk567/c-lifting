@@ -207,7 +207,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
             if (primaryExpr.Identifier() != null) {
                 initializerNode = new VariableNode(primaryExpr.Identifier().getText());
             } else if (primaryExpr.Constant() != null) {
-                initializerNode = new ConstantNode(primaryExpr.Constant().getText());
+                initializerNode = new LiteralNode(primaryExpr.Constant().getText());
             } else {
                 System.out.println(String.join(" ", 
                     "Warning (line " + ctx.getStart().getLine() + "):",
