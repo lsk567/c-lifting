@@ -2,11 +2,11 @@ package example.antlr.ast;
 
 import java.util.ArrayList;
 
-public class ASTNodeDynamic extends ASTNode {
+public class AstNodeDynamic extends AstNode {
 
-    public ArrayList<ASTNode> children = new ArrayList<>();
+    public ArrayList<AstNode> children = new ArrayList<>();
 
-    public ASTNodeDynamic() {
+    public AstNodeDynamic() {
         super();
     }
 }

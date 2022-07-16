@@ -1,11 +1,15 @@
 package example.antlr.ast;
 
-public class ASTNodeBinary extends ASTNode {
+import example.antlr.AstVisitor;
+import example.antlr.CAstVisitor;
 
-    public ASTNode left;
-    public ASTNode right;
+public class AstNodeBinary extends AstNode implements Visitable {
 
-    public ASTNodeBinary() {
-        super();
+    public AstNode left;
+    public AstNode right;
+
+    @Override
+    public <T> T accept(AstVisitor<? extends T> visitor) {
+        return ((CAstVisitor<? extends T>)visitor).visitAstNodeBinary(this);
     }
 }

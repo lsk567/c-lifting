@@ -1,10 +1,10 @@
 package example.antlr.ast;
 
-public class ASTNodeUnary extends ASTNode {
+public class AstNodeUnary extends AstNode {
 
-    public ASTNode child;
+    public AstNode child;
 
-    public ASTNodeUnary() {
+    public AstNodeUnary() {
         super();
     }
 }

@@ -1,6 +1,6 @@
 package example.antlr.ast;
 
-public class VariableNode extends ASTNode {
+public class VariableNode extends AstNode {
 
     public enum Type {
         UNKNOWN, INT, BOOLEAN

@@ -1,7 +1,9 @@
 package example.antlr.ast;
 
-public class ASTNode {
-    public ASTNode() {
+import example.antlr.AstVisitor;
 
-    }
+public class AstNode implements Visitable {
+    
+    @Override
+	public <T> T accept(AstVisitor<? extends T> visitor) { return visitor.visitChildren(this); } 
 }

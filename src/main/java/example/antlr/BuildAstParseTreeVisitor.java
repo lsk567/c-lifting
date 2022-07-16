@@ -16,11 +16,11 @@ import example.antlr.CParser.PrimaryExpressionContext;
 import example.antlr.ast.*;
 import example.antlr.ast.VariableNode.Type;
 
-public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
-    private static final Logger LOG = LoggerFactory.getLogger(BuildAstVisitor.class);
+public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
+    private static final Logger LOG = LoggerFactory.getLogger(BuildAstParseTreeVisitor.class);
 
     @Override
-    public ASTNode visitBlockItemList(CParser.BlockItemListContext ctx) {
+    public AstNode visitBlockItemList(CParser.BlockItemListContext ctx) {
         StatementSequenceNode stmtSeq = new StatementSequenceNode();
         
         // Populate the children.
@@ -35,7 +35,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBlockItem(CParser.BlockItemContext ctx) {
+    public AstNode visitBlockItem(CParser.BlockItemContext ctx) {
         if (ctx.statement() != null)
             return visit(ctx.statement());
         else
@@ -43,7 +43,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitDeclaration(CParser.DeclarationContext ctx) {
+    public AstNode visitDeclaration(CParser.DeclarationContext ctx) {
         if (ctx.declarationSpecifiers() != null 
             && ctx.initDeclaratorList() != null) {
             //// Extract type from declarationSpecifiers.
@@ -147,7 +147,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
 
             // Extract the name of the variable.
             String name = directDecl.Identifier().getText();             
-            // Create a variable AST node.
+            // Create a variable Ast node.
             VariableNode variable = new VariableNode(type, name);
 
 
@@ -181,7 +181,7 @@ public class BuildAstVisitor extends CBaseVisitor<ASTNode> {
             }
 
             PrimaryExpressionContext primaryExpr;
-            ASTNode initializerNode;
+            AstNode initializerNode;
             try {
                 // FIXME: This is cutting some corners with interpreting
                 // the program. Currently, inline arithmetic operations
