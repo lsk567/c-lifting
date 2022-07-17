@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import example.antlr.CParser.BlockItemListContext;
-import example.antlr.ast.AstNode;
-import example.antlr.ast.StatementSequenceNode;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -29,12 +27,12 @@ public class Main {
 
             // Build an AST.
             BuildAstParseTreeVisitor buildAstVisitor = new BuildAstParseTreeVisitor();
-            AstNode ast = buildAstVisitor.visitBlockItemList(parseTree);
+            CAst.AstNode ast = buildAstVisitor.visitBlockItemList(parseTree);
 
             // Convert the AST to If Normal Form (INF).
             IfNormalFormAstVisitor infVisitor = new IfNormalFormAstVisitor();
-            infVisitor.visit(ast, new ArrayList<AstNode>());
-            StatementSequenceNode inf = infVisitor.INF;
+            infVisitor.visit(ast, new ArrayList<CAst.AstNode>());
+            CAst.StatementSequenceNode inf = infVisitor.INF;
             System.out.println(inf);
 
             // Traverse and print.

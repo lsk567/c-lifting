@@ -2,8 +2,6 @@ package example.antlr;
 
 import java.util.List;
 
-import example.antlr.ast.*;
-
 /** Modeled after CBaseVisitor.java */
 public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVisitor<T> {
     
@@ -14,14 +12,14 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	 * Let's keep it here for now for consistency.
 	 */
 	@Override
-	public T visitAstNode(AstNode node) {
+	public T visitAstNode(CAst.AstNode node) {
 		System.out.print("[visitAstNode] ");
 		System.out.println("Hi, I am " + node);
 		return null;
 	}
 
 	@Override
-	public T visitAstNodeUnary(AstNodeUnary node) {
+	public T visitAstNodeUnary(CAst.AstNodeUnary node) {
 		System.out.print("[visitAstNodeUnary] ");
 		System.out.println("Hi, I am " + node);
 		T result = visit(node.child);
@@ -29,7 +27,7 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	}
 
 	@Override
-	public T visitAstNodeBinary(AstNodeBinary node) {
+	public T visitAstNodeBinary(CAst.AstNodeBinary node) {
 		System.out.print("[visitAstNodeBinary] ");
 		System.out.println("Hi, I am " + node);
 		T leftResult = visit(node.left);
@@ -39,133 +37,133 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	}
 
 	@Override
-	public T visitAstNodeDynamic(AstNodeDynamic node) {
+	public T visitAstNodeDynamic(CAst.AstNodeDynamic node) {
 		System.out.print("[visitAstNodeDynamic] ");
 		System.out.println("Hi, I am " + node);
-		for (AstNode n : node.children) {
+		for (CAst.AstNode n : node.children) {
 			T result = visit(n);
 		}
 		return null;
 	}
 
     @Override
-	public T visitAssignmentNode(AssignmentNode node) {
+	public T visitAssignmentNode(CAst.AssignmentNode node) {
 		// The default implementation reuses visitAstNodeBinary(node).
 		System.out.print("[visitAssignmentNode] ");
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitIfBlockNode(IfBlockNode node) {
+	public T visitIfBlockNode(CAst.IfBlockNode node) {
 		System.out.print("[visitIfBlockNode] ");
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitIfBodyNode(IfBodyNode node) {
+	public T visitIfBodyNode(CAst.IfBodyNode node) {
 		System.out.print("[visitIfBodyNode] ");
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitLiteralNode(LiteralNode node) {
+	public T visitLiteralNode(CAst.LiteralNode node) {
 		System.out.println("Hi, I am " + node + " with literal " + node.literal);
 		return null;
 	}
 
 	@Override
-	public T visitLogicalAndNode(LogicalAndNode node) {
+	public T visitLogicalAndNode(CAst.LogicalAndNode node) {
 		System.out.print("[visitLogicalAndNode] ");
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitLogicalOrNode(LogicalOrNode node) {
+	public T visitLogicalOrNode(CAst.LogicalOrNode node) {
 		System.out.print("[visitLogicalOrNode] ");
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitOpaqueNode(OpaqueNode node) {
+	public T visitOpaqueNode(CAst.OpaqueNode node) {
 		System.out.print("[visitOpaqueNode] ");
 		return visitAstNode(node);
 	}
 
 	@Override
-	public T visitStatementSequenceNode(StatementSequenceNode node) {
+	public T visitStatementSequenceNode(CAst.StatementSequenceNode node) {
 		System.out.print("[visitStatementSequenceNode] ");
 		return visitAstNodeDynamic(node);
 	}
 
 	@Override
-	public T visitVariableNode(VariableNode node) {
+	public T visitVariableNode(CAst.VariableNode node) {
 		System.out.println("Hi, I am " + node + ": (" + node.type + ", " + node.name + ")");
 		return null;
 	}
 
 	//// With one more parameter.
 	@Override
-	public T visitAstNode(AstNode node, List<AstNode> nodeList) {
+	public T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList) {
 		return visitAstNode(node);
 	}
 
 	@Override
-	public T visitAstNodeUnary(AstNodeUnary node, List<AstNode> nodeList) {
+	public T visitAstNodeUnary(CAst.AstNodeUnary node, List<CAst.AstNode> nodeList) {
 		return visitAstNodeUnary(node);
 	}
 
 	@Override
-	public T visitAstNodeBinary(AstNodeBinary node, List<AstNode> nodeList) {
+	public T visitAstNodeBinary(CAst.AstNodeBinary node, List<CAst.AstNode> nodeList) {
 		return visitAstNodeBinary(node);
 	}
 
 	@Override
-	public T visitAstNodeDynamic(AstNodeDynamic node, List<AstNode> nodeList) {
+	public T visitAstNodeDynamic(CAst.AstNodeDynamic node, List<CAst.AstNode> nodeList) {
 		return visitAstNodeDynamic(node);
 	}
 
 	@Override
-	public T visitAssignmentNode(AssignmentNode node, List<AstNode> nodeList) {
+	public T visitAssignmentNode(CAst.AssignmentNode node, List<CAst.AstNode> nodeList) {
 		return visitAssignmentNode(node);
 	}
 
 	@Override
-	public T visitIfBlockNode(IfBlockNode node, List<AstNode> nodeList) {
+	public T visitIfBlockNode(CAst.IfBlockNode node, List<CAst.AstNode> nodeList) {
 		return visitIfBlockNode(node);
 	}
 
 	@Override
-	public T visitIfBodyNode(IfBodyNode node, List<AstNode> nodeList) {
+	public T visitIfBodyNode(CAst.IfBodyNode node, List<CAst.AstNode> nodeList) {
 		return visitIfBodyNode(node);
 	}
 
 	@Override
-	public T visitLiteralNode(LiteralNode node, List<AstNode> nodeList) {
+	public T visitLiteralNode(CAst.LiteralNode node, List<CAst.AstNode> nodeList) {
 		return visitLiteralNode(node);
 	}
 
 	@Override
-	public T visitLogicalAndNode(LogicalAndNode node, List<AstNode> nodeList) {
+	public T visitLogicalAndNode(CAst.LogicalAndNode node, List<CAst.AstNode> nodeList) {
 		return visitLogicalAndNode(node);
 	}
 
 	@Override
-	public T visitLogicalOrNode(LogicalOrNode node, List<AstNode> nodeList) {
+	public T visitLogicalOrNode(CAst.LogicalOrNode node, List<CAst.AstNode> nodeList) {
 		return visitLogicalOrNode(node);
 	}
 
 	@Override
-	public T visitOpaqueNode(OpaqueNode node, List<AstNode> nodeList) {
+	public T visitOpaqueNode(CAst.OpaqueNode node, List<CAst.AstNode> nodeList) {
 		return visitOpaqueNode(node);
 	}
 
 	@Override
-	public T visitStatementSequenceNode(StatementSequenceNode node, List<AstNode> nodeList) {
+	public T visitStatementSequenceNode(CAst.StatementSequenceNode node, List<CAst.AstNode> nodeList) {
 		return visitStatementSequenceNode(node);
 	}
 
 	@Override
-	public T visitVariableNode(VariableNode node, List<AstNode> nodeList) {
+	public T visitVariableNode(CAst.VariableNode node, List<CAst.AstNode> nodeList) {
 		return visitVariableNode(node);
 	}
 }

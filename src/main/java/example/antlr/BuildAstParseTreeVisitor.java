@@ -13,15 +13,13 @@ import example.antlr.CParser.DeclaratorContext;
 import example.antlr.CParser.DirectDeclaratorContext;
 import example.antlr.CParser.InitDeclaratorContext;
 import example.antlr.CParser.PrimaryExpressionContext;
-import example.antlr.ast.*;
-import example.antlr.ast.VariableNode.Type;
 
-public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
+public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
     private static final Logger LOG = LoggerFactory.getLogger(BuildAstParseTreeVisitor.class);
 
     @Override
-    public AstNode visitBlockItemList(CParser.BlockItemListContext ctx) {
-        StatementSequenceNode stmtSeq = new StatementSequenceNode();
+    public CAst.AstNode visitBlockItemList(CParser.BlockItemListContext ctx) {
+        CAst.StatementSequenceNode stmtSeq = new CAst.StatementSequenceNode();
         
         // Populate the children.
         for (BlockItemContext blockItem : ctx.blockItem()) {
@@ -35,7 +33,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitBlockItem(CParser.BlockItemContext ctx) {
+    public CAst.AstNode visitBlockItem(CParser.BlockItemContext ctx) {
         if (ctx.statement() != null)
             return visit(ctx.statement());
         else
@@ -43,7 +41,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
     }
 
     @Override
-    public AstNode visitDeclaration(CParser.DeclarationContext ctx) {
+    public CAst.AstNode visitDeclaration(CParser.DeclarationContext ctx) {
         if (ctx.declarationSpecifiers() != null 
             && ctx.initDeclaratorList() != null) {
             //// Extract type from declarationSpecifiers.
@@ -59,7 +57,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. static const int.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
             
             // Check if the declaration specifier is a type specifier: e.g. int or long.
@@ -71,12 +69,12 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. \"static const int\" is not analyzable.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
             
             // Check if the type specifier is what we currently support.
             // Right now we only support int, long, & double.
-            VariableNode.Type type;
+            CAst.VariableNode.Type type;
             ArrayList<String> supportedTypes = new ArrayList<String>(
                 Arrays.asList(
                     "int",
@@ -87,7 +85,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
             if (declSpec.typeSpecifier().Int() != null
                 || declSpec.typeSpecifier().Long() != null
                 || declSpec.typeSpecifier().Double() != null) 
-                type = Type.INT;
+                type = CAst.VariableNode.Type.INT;
             // Mark the declaration unanalyzable if the type is unsupported.
             else {
                 System.out.println(String.join(" ", 
@@ -96,7 +94,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "Only " + supportedTypes + " are supported.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
 
             //// Extract variable name and value from initDeclaratorList.
@@ -112,7 +110,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. \"int x = 1, y = 2;\" is not yet analyzable.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
 
             // Get the variable name from the declarator.
@@ -124,7 +122,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. \"int *x;\" is not yet analyzable.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
             if (decl.gccDeclaratorExtension().size() > 0) {
                 System.out.println(String.join(" ", 
@@ -133,7 +131,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. \"__asm\" and \"__attribute__\" are not yet analyzable.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
             DirectDeclaratorContext directDecl = decl.directDeclarator();
             if (directDecl.Identifier() == null) {
@@ -142,13 +140,13 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "the variable identifier is missing.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
 
             // Extract the name of the variable.
             String name = directDecl.Identifier().getText();             
             // Create a variable Ast node.
-            VariableNode variable = new VariableNode(type, name);
+            CAst.VariableNode variable = new CAst.VariableNode(type, name);
 
 
             //// Convert the initializer to a value.
@@ -162,10 +160,10 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "e.g. \"int x;\" is not yet analyzable.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
 
-                // FIXME: Use UninitVariableNode to perform special encoding.
-                // return new UninitVariableNode(type, name);
+                // FIXME: Use UninitCAst.VariableNode to perform special encoding.
+                // return new UninitCAst.VariableNode(type, name);
             }
 
             // Extract the primaryExpression from the initializer.
@@ -177,11 +175,11 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "assignmentExpression or conditionalExpression is missing.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
 
             PrimaryExpressionContext primaryExpr;
-            AstNode initializerNode;
+            CAst.AstNode initializerNode;
             try {
                 // FIXME: This is cutting some corners with interpreting
                 // the program. Currently, inline arithmetic operations
@@ -202,28 +200,43 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<AstNode> {
                     "unable to extract a primary expression from the initializer.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
             if (primaryExpr.Identifier() != null) {
-                initializerNode = new VariableNode(primaryExpr.Identifier().getText());
+                initializerNode = new CAst.VariableNode(primaryExpr.Identifier().getText());
             } else if (primaryExpr.Constant() != null) {
-                initializerNode = new LiteralNode(primaryExpr.Constant().getText());
+                initializerNode = new CAst.LiteralNode(primaryExpr.Constant().getText());
             } else {
                 System.out.println(String.join(" ", 
                     "Warning (line " + ctx.getStart().getLine() + "):",
                     "only identifier and constant are supported on the RHS of the declaration.",
                     "Marking the declaration as opaque."
                 ));
-                return new OpaqueNode();
+                return new CAst.OpaqueNode();
             }
 
             // Finally return the assignment node.
-            AssignmentNode assignmentNode = new AssignmentNode();
+            CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
             assignmentNode.left = variable;
             assignmentNode.right = initializerNode;
             return assignmentNode;
         }
-        // Return OpaqueNode as default.
-        return new OpaqueNode();
+        // Return CAst.OpaqueNode as default.
+        return new CAst.OpaqueNode();
+    }
+
+    /**
+     * This visit function builds CAst.StatementSequenceNode, CAst.AssignmentNode,
+     * SetPortNode, ScheduleNode, CAst.OpaqueNode, IfBlockNode,
+     * AdditionNode, SubtractionNode, MultiplicationNode, DivisionNode,
+     * EqualNode, NotEqualNode, LessThanNode, GreaterThanNode,
+     * LessEqualNode, GreaterEqualNode.
+     * 
+     * @param ctx
+     * @return
+     */
+    @Override
+    public CAst.AstNode visitStatement(CParser.StatementContext ctx) {
+        return null;
     }
 }

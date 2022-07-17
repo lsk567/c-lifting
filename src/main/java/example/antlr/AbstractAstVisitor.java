@@ -2,18 +2,16 @@ package example.antlr;
 
 import java.util.List;
 
-import example.antlr.ast.AstNode;
-
 /** Modeled after AbstractParseTreeVisitor.class */
 public abstract class AbstractAstVisitor<T> implements AstVisitor<T> {
     
     @Override
-    public T visit(AstNode tree) {
+    public T visit(CAst.AstNode tree) {
       return tree.accept(this);
     }
 
     @Override
-    public T visit(AstNode tree, List<AstNode> nodeList) {
+    public T visit(CAst.AstNode tree, List<CAst.AstNode> nodeList) {
       return tree.accept(this, nodeList);
     }
 }
