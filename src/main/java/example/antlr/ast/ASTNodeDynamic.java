@@ -7,7 +7,7 @@ import example.antlr.CAstVisitor;
 
 import java.util.ArrayList;
 
-public class AstNodeDynamic extends AstNode {
+public class AstNodeDynamic extends AstNode implements Visitable {
 
     public ArrayList<AstNode> children = new ArrayList<>();
 
