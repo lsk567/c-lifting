@@ -5,7 +5,7 @@ import java.util.List;
 import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
 
-public class StatementSequenceNode extends AstNodeDynamic {
+public class StatementSequenceNode extends AstNodeDynamic implements Visitable {
     
     @Override
     public <T> T accept(AstVisitor<? extends T> visitor) {

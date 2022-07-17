@@ -10,7 +10,7 @@ import example.antlr.CAstVisitor;
  * The left node is the then branch.
  * The right node is the else branch.
  */
-public class IfBodyNode extends AstNodeBinary {
+public class IfBodyNode extends AstNodeBinary implements Visitable {
     
     @Override
     public <T> T accept(AstVisitor<? extends T> visitor) {

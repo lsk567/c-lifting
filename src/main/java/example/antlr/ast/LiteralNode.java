@@ -4,7 +4,7 @@ import java.util.List;
 
 import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
-public class LiteralNode extends AstNode {
+public class LiteralNode extends AstNode implements Visitable {
     
     public String literal;
     

@@ -5,7 +5,7 @@ import java.util.List;
 import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
 
-public class VariableNode extends AstNode {
+public class VariableNode extends AstNode implements Visitable {
 
     public enum Type {
         UNKNOWN, INT, BOOLEAN

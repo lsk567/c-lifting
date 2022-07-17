@@ -10,7 +10,7 @@ import example.antlr.CAstVisitor;
  * The left node is the condition.
  * The right node is the if body.
  */
-public class IfBlockNode extends AstNodeBinary {
+public class IfBlockNode extends AstNodeBinary implements Visitable {
     
     public AstNode getCondition() {
         return this.left;

@@ -5,7 +5,7 @@ import java.util.List;
 import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
 
-public class LogicalAndNode extends AstNodeBinary {
+public class LogicalAndNode extends AstNodeBinary implements Visitable {
     
     @Override
     public <T> T accept(AstVisitor<? extends T> visitor) {
