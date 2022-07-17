@@ -226,11 +226,12 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
     }
 
     /**
-     * This visit function builds CAst.StatementSequenceNode, CAst.AssignmentNode,
-     * SetPortNode, ScheduleNode, CAst.OpaqueNode, IfBlockNode,
+     * This visit function builds StatementSequenceNode, AssignmentNode,
+     * OpaqueNode, IfBlockNode,
      * AdditionNode, SubtractionNode, MultiplicationNode, DivisionNode,
      * EqualNode, NotEqualNode, LessThanNode, GreaterThanNode,
-     * LessEqualNode, GreaterEqualNode.
+     * LessEqualNode, GreaterEqualNode,
+     * SetPortNode, ScheduleNode.
      * 
      * @param ctx
      * @return

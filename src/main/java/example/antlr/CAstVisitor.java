@@ -19,6 +19,12 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitStatementSequenceNode(CAst.StatementSequenceNode node);
 	T visitVariableNode(CAst.VariableNode node);
 
+	T visitAdditionNode(CAst.AdditionNode node);
+	T visitSubtractionNode(CAst.SubtractionNode node);
+	T visitMultiplicationNode(CAst.MultiplicationNode node);
+	T visitDivisionNode(CAst.DivisionNode node);
+
+	/** Used for converting an AST into If Normal Form. */
 	T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList);
 	T visitAstNodeUnary(CAst.AstNodeUnary node, List<CAst.AstNode> nodeList);
 	T visitAstNodeBinary(CAst.AstNodeBinary node, List<CAst.AstNode> nodeList);
@@ -32,4 +38,9 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitOpaqueNode(CAst.OpaqueNode node, List<CAst.AstNode> nodeList);
 	T visitStatementSequenceNode(CAst.StatementSequenceNode node, List<CAst.AstNode> nodeList);
 	T visitVariableNode(CAst.VariableNode node, List<CAst.AstNode> nodeList);
+
+	T visitAdditionNode(CAst.AdditionNode node, List<CAst.AstNode> nodeList);
+	T visitSubtractionNode(CAst.SubtractionNode node, List<CAst.AstNode> nodeList);
+	T visitMultiplicationNode(CAst.MultiplicationNode node, List<CAst.AstNode> nodeList);
+	T visitDivisionNode(CAst.DivisionNode node, List<CAst.AstNode> nodeList);
 }

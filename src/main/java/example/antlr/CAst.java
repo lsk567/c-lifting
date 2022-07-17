@@ -165,4 +165,42 @@ public class CAst {
             return ((CAstVisitor<? extends T>)visitor).visitVariableNode(this, nodeList);
         }
     }
+
+    /** Arithmetic operations */
+
+    public static class AdditionNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitAdditionNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitAdditionNode(this, nodeList);
+        }
+    }
+
+    public static class SubtractionNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitSubtractionNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitSubtractionNode(this, nodeList);
+        }
+    }
+
+    public static class MultiplicationNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitMultiplicationNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitMultiplicationNode(this, nodeList);
+        }
+    }
+
+    public static class DivisionNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitDivisionNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitDivisionNode(this, nodeList);
+        }
+    }
 }

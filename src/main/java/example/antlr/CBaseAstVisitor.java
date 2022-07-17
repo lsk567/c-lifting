@@ -101,6 +101,36 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 		return null;
 	}
 
+	/** Arithmetic operations */
+
+	@Override
+	public T visitAdditionNode(CAst.AdditionNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitAdditionNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitSubtractionNode(CAst.SubtractionNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitSubtractionNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitMultiplicationNode(CAst.MultiplicationNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitMultiplicationNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitDivisionNode(CAst.DivisionNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitDivisionNode] ");
+		return visitAstNodeBinary(node);
+	}
+
 	//// With one more parameter.
 	@Override
 	public T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList) {
@@ -166,4 +196,27 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	public T visitVariableNode(CAst.VariableNode node, List<CAst.AstNode> nodeList) {
 		return visitVariableNode(node);
 	}
+
+	/** Arithmetic operations */
+	
+	@Override
+	public T visitAdditionNode(CAst.AdditionNode node, List<CAst.AstNode> nodeList) {
+		return visitAdditionNode(node);
+	}
+
+	@Override
+	public T visitSubtractionNode(CAst.SubtractionNode node, List<CAst.AstNode> nodeList) {
+		return visitSubtractionNode(node);
+	}
+
+	@Override
+	public T visitMultiplicationNode(CAst.MultiplicationNode node, List<CAst.AstNode> nodeList) {
+		return visitMultiplicationNode(node);
+	}
+
+	@Override
+	public T visitDivisionNode(CAst.DivisionNode node, List<CAst.AstNode> nodeList) {
+		return visitDivisionNode(node);
+	}
+
 }
