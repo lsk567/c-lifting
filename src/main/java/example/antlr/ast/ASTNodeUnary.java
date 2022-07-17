@@ -4,7 +4,7 @@ import java.util.List;
 
 import example.antlr.AstVisitor;
 import example.antlr.CAstVisitor;
-public class AstNodeUnary extends AstNode {
+public class AstNodeUnary extends AstNode implements Visitable {
 
     public AstNode child;
 
