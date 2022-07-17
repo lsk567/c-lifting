@@ -24,6 +24,13 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitMultiplicationNode(CAst.MultiplicationNode node);
 	T visitDivisionNode(CAst.DivisionNode node);
 
+	T visitEqualNode(CAst.EqualNode node);
+	T visitNotEqualNode(CAst.NotEqualNode node);
+	T visitLessThanNode(CAst.LessThanNode node);
+	T visitLessEqualNode(CAst.LessEqualNode node);
+	T visitGreaterThanNode(CAst.GreaterThanNode node);
+	T visitGreaterEqualNode(CAst.GreaterEqualNode node);
+
 	/** Used for converting an AST into If Normal Form. */
 	T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList);
 	T visitAstNodeUnary(CAst.AstNodeUnary node, List<CAst.AstNode> nodeList);
@@ -43,4 +50,12 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitSubtractionNode(CAst.SubtractionNode node, List<CAst.AstNode> nodeList);
 	T visitMultiplicationNode(CAst.MultiplicationNode node, List<CAst.AstNode> nodeList);
 	T visitDivisionNode(CAst.DivisionNode node, List<CAst.AstNode> nodeList);
+
+	T visitEqualNode(CAst.EqualNode node, List<CAst.AstNode> nodeList);
+	T visitNotEqualNode(CAst.NotEqualNode node, List<CAst.AstNode> nodeList);
+	T visitLessThanNode(CAst.LessThanNode node, List<CAst.AstNode> nodeList);
+	T visitLessEqualNode(CAst.LessEqualNode node, List<CAst.AstNode> nodeList);
+	T visitGreaterThanNode(CAst.GreaterThanNode node, List<CAst.AstNode> nodeList);
+	T visitGreaterEqualNode(CAst.GreaterEqualNode node, List<CAst.AstNode> nodeList);
+
 }

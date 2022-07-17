@@ -203,4 +203,60 @@ public class CAst {
             return ((CAstVisitor<? extends T>)visitor).visitDivisionNode(this, nodeList);
         }
     }
+
+    /** Comparison operators */
+
+    public static class EqualNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitEqualNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitEqualNode(this, nodeList);
+        }
+    }
+
+    public static class NotEqualNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitNotEqualNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitNotEqualNode(this, nodeList);
+        }
+    }
+
+    public static class LessThanNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitLessThanNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitLessThanNode(this, nodeList);
+        }
+    }
+
+    public static class LessEqualNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitLessEqualNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitLessEqualNode(this, nodeList);
+        }
+    }
+
+    public static class GreaterThanNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitGreaterThanNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitGreaterThanNode(this, nodeList);
+        }
+    }
+
+    public static class GreaterEqualNode extends AstNodeBinary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitGreaterEqualNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitGreaterEqualNode(this, nodeList);
+        }
+    }
 }

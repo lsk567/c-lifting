@@ -101,7 +101,7 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 		return null;
 	}
 
-	/** Arithmetic operations */
+	/** Arithmetic operators */
 
 	@Override
 	public T visitAdditionNode(CAst.AdditionNode node) {
@@ -128,6 +128,50 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	public T visitDivisionNode(CAst.DivisionNode node) {
 		// The default implementation reuses visitAstNodeBinary(node).
 		System.out.print("[visitDivisionNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	/** Comparison operators */
+
+	@Override
+	public T visitEqualNode(CAst.EqualNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitEqualNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitNotEqualNode(CAst.NotEqualNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitNotEqualNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitLessThanNode(CAst.LessThanNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitLessThanNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitLessEqualNode(CAst.LessEqualNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitLessEqualNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitGreaterThanNode(CAst.GreaterThanNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitGreaterThanNode] ");
+		return visitAstNodeBinary(node);
+	}
+
+	@Override
+	public T visitGreaterEqualNode(CAst.GreaterEqualNode node) {
+		// The default implementation reuses visitAstNodeBinary(node).
+		System.out.print("[visitGreaterEqualNode] ");
 		return visitAstNodeBinary(node);
 	}
 
@@ -197,7 +241,7 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 		return visitVariableNode(node);
 	}
 
-	/** Arithmetic operations */
+	/** Arithmetic operators */
 	
 	@Override
 	public T visitAdditionNode(CAst.AdditionNode node, List<CAst.AstNode> nodeList) {
@@ -217,6 +261,38 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	@Override
 	public T visitDivisionNode(CAst.DivisionNode node, List<CAst.AstNode> nodeList) {
 		return visitDivisionNode(node);
+	}
+
+	/** Comparison operators */
+	
+	@Override
+	public T visitEqualNode(CAst.EqualNode node, List<CAst.AstNode> nodeList) {
+		return visitEqualNode(node);
+	}
+
+	@Override
+	public T visitNotEqualNode(CAst.NotEqualNode node, List<CAst.AstNode> nodeList) {
+		return visitNotEqualNode(node);
+	}
+
+	@Override
+	public T visitLessThanNode(CAst.LessThanNode node, List<CAst.AstNode> nodeList) {
+		return visitLessThanNode(node);
+	}
+
+	@Override
+	public T visitLessEqualNode(CAst.LessEqualNode node, List<CAst.AstNode> nodeList) {
+		return visitLessEqualNode(node);
+	}
+
+	@Override
+	public T visitGreaterThanNode(CAst.GreaterThanNode node, List<CAst.AstNode> nodeList) {
+		return visitGreaterThanNode(node);
+	}
+
+	@Override
+	public T visitGreaterEqualNode(CAst.GreaterEqualNode node, List<CAst.AstNode> nodeList) {
+		return visitGreaterEqualNode(node);
 	}
 
 }
