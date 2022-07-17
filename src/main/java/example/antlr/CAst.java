@@ -259,4 +259,38 @@ public class CAst {
             return ((CAstVisitor<? extends T>)visitor).visitGreaterEqualNode(this, nodeList);
         }
     }
+
+    /** LF built-in operations */
+
+    public static class SetPortNode extends AstNode implements Visitable {
+        public AstNode port; // self struct variable access is a postfixExpression.
+        public AstNode value; // Could be literal, variable, or pointer.
+        public SetPortNode(AstNode port, AstNode value) {
+            this.port = port;
+            this.value = value;
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitSetPortNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitSetPortNode(this, nodeList);
+        }
+    }
+
+    public static class ScheduleActionNode extends AstNode implements Visitable {
+        public AstNode action; // self struct variable access is a postfixExpression.
+        public AstNode value; // Could be literal, variable, or pointer.
+        public AstNode additionalDelay;
+        public ScheduleActionNode(AstNode action, AstNode value, AstNode additionalDelay) {
+            this.action = action;
+            this.value = value;
+            this.additionalDelay = additionalDelay;
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitScheduleActionNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitScheduleActionNode(this, nodeList);
+        }
+    }
 }

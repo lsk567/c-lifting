@@ -175,6 +175,20 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 		return visitAstNodeBinary(node);
 	}
 
+	/** LF built-in operations */
+
+	@Override
+	public T visitSetPortNode(CAst.SetPortNode node) {
+		System.out.print("[visitSetPortNode] ");
+		return visitAstNode(node);
+	}
+
+	@Override
+	public T visitScheduleActionNode(CAst.ScheduleActionNode node) {
+		System.out.print("[visitScheduleActionNode] ");
+		return visitAstNode(node);
+	}
+
 	//// With one more parameter.
 	@Override
 	public T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList) {
@@ -293,6 +307,18 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	@Override
 	public T visitGreaterEqualNode(CAst.GreaterEqualNode node, List<CAst.AstNode> nodeList) {
 		return visitGreaterEqualNode(node);
+	}
+
+	/** LF built-in operations */
+
+	@Override
+	public T visitSetPortNode(CAst.SetPortNode node, List<CAst.AstNode> nodeList) {
+		return visitSetPortNode(node);
+	}
+
+	@Override
+	public T visitScheduleActionNode(CAst.ScheduleActionNode node, List<CAst.AstNode> nodeList) {
+		return visitScheduleActionNode(node);
 	}
 
 }

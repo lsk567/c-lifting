@@ -31,6 +31,9 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitGreaterThanNode(CAst.GreaterThanNode node);
 	T visitGreaterEqualNode(CAst.GreaterEqualNode node);
 
+	T visitSetPortNode(CAst.SetPortNode node);
+	T visitScheduleActionNode(CAst.ScheduleActionNode node);
+
 	/** Used for converting an AST into If Normal Form. */
 	T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList);
 	T visitAstNodeUnary(CAst.AstNodeUnary node, List<CAst.AstNode> nodeList);
@@ -57,5 +60,8 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitLessEqualNode(CAst.LessEqualNode node, List<CAst.AstNode> nodeList);
 	T visitGreaterThanNode(CAst.GreaterThanNode node, List<CAst.AstNode> nodeList);
 	T visitGreaterEqualNode(CAst.GreaterEqualNode node, List<CAst.AstNode> nodeList);
+
+	T visitSetPortNode(CAst.SetPortNode node, List<CAst.AstNode> nodeList);
+	T visitScheduleActionNode(CAst.ScheduleActionNode node, List<CAst.AstNode> nodeList);
 
 }
