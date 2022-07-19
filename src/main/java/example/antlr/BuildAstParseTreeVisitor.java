@@ -178,6 +178,7 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
                 return new CAst.OpaqueNode();
             }
 
+            //// Process the right hand side of the assignment.
             PrimaryExpressionContext primaryExpr;
             CAst.AstNode initializerNode;
             try {
@@ -237,6 +238,121 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
      */
     @Override
     public CAst.AstNode visitStatement(CParser.StatementContext ctx) {
+        if (ctx.compoundStatement() != null) {
+            CParser.BlockItemListContext bilCtx = ctx.compoundStatement().blockItemList();
+            if (bilCtx != null) {
+                return visitBlockItemList(bilCtx);
+            }
+        } else if (ctx.expressionStatement() != null) {
+            CParser.ExpressionContext exprCtx = ctx.expressionStatement().expression();
+            if (exprCtx != null) {
+                return visitExpression(exprCtx);
+            }
+        } else if (ctx.selectionStatement() != null) {
+            return visitSelectionStatement(ctx.selectionStatement());
+        }
+        return new CAst.OpaqueNode();
+    }
+
+    @Override
+    public CAst.AstNode visitExpression(CParser.ExpressionContext ctx) {
+        if (ctx.assignmentExpression().size() == 1) {
+            return visitAssignmentExpression(ctx.assignmentExpression().get(0));
+        }
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "only one assignmentExpression in an expression is currently supported.",
+            "Marking the statement as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }
+
+    @Override
+    public CAst.AstNode visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
+        if (ctx.conditionalExpression() != null) {
+            return visitConditionalExpression(ctx.conditionalExpression());
+        }
+        if (ctx.unaryExpression() != null
+            && ctx.assignmentOperator() != null
+            && ctx.assignmentExpression() != null) {
+            CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
+            assignmentNode.left = visitUnaryExpression(ctx.unaryExpression());
+            assignmentNode.right = visitAssignmentExpression(ctx.assignmentExpression());
+            return assignmentNode;
+        }
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "DigitSequence in an assignmentExpression is currently not allowed.",
+            "Marking the expression as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }
+
+
+
+    @Override
+    public CAst.AstNode visitExclusiveOrExpression(CParser.ExclusiveOrExpressionContext ctx) {
+        if (ctx.andExpression().size() > 1) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Exclusive Or '^' is currently unsupported.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        return visitAndExpression(ctx.andExpression().get(0));
+    }
+
+    @Override
+    public CAst.AstNode visitInclusiveOrExpression(CParser.InclusiveOrExpressionContext ctx) {
+        if (ctx.exclusiveOrExpression().size() > 1) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Inclusive Or '|' is currently unsupported.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        return visitExclusiveOrExpression(ctx.exclusiveOrExpression().get(0));
+    }
+
+    @Override
+    public CAst.AstNode visitLogicalAndExpression(CParser.LogicalAndExpressionContext ctx) {
+        CAst.LogicalAndNode node = new CAst.LogicalAndNode();
+        node.left = visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(0));
+        if (ctx.inclusiveOrExpression().size() > 1) {
+            node.right = visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(1));
+        }
+        return node;
+    }
+
+    @Override
+    public CAst.AstNode visitLogicalOrExpression(CParser.LogicalOrExpressionContext ctx) {
+        CAst.LogicalOrNode node = new CAst.LogicalOrNode();
+        node.left = visitLogicalAndExpression(ctx.logicalAndExpression().get(0));
+        if (ctx.logicalAndExpression().size() > 1) {
+            node.right = visitLogicalAndExpression(ctx.logicalAndExpression().get(1));
+        }
+        return node;
+    }
+
+    @Override
+    public CAst.AstNode visitConditionalExpression(CParser.ConditionalExpressionContext ctx) {
+        if (ctx.expression() != null) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Currently do not support inline conditional expression.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        return visitLogicalOrExpression(ctx.logicalOrExpression());
+    }
+
+    
+
+    @Override
+    public CAst.AstNode visitUnaryExpression(CParser.UnaryExpressionContext ctx) {
         return null;
     }
 }
