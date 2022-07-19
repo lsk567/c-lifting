@@ -288,7 +288,56 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
         return new CAst.OpaqueNode();
     }
 
+    @Override
+    public CAst.AstNode visitRelationalExpression(CParser.RelationalExpressionContext ctx) {
+        CAst.AstNodeBinary node;
+        if (ctx.Less() != null) {
+            node = new CAst.LessThanNode();
+        } else if (ctx.LessEqual() != null) {
+            node = new CAst.LessEqualNode();
+        } else if (ctx.Greater() != null) { 
+            node = new CAst.GreaterThanNode();
+        } else if (ctx.GreaterEqual() != null) {
+            node = new CAst.GreaterEqualNode();
+        } else {
+            node = new CAst.AstNodeBinary();
+        }
+        node.left = visitShiftExpression(ctx.shiftExpression().get(0));
+        if (ctx.shiftExpression().size() > 1) {
+            node.right = visitShiftExpression(ctx.shiftExpression().get(1));
+        }
+        return node;
+    }
 
+    @Override
+    public CAst.AstNode visitEqualityExpression(CParser.EqualityExpressionContext ctx) {
+        CAst.AstNodeBinary node;
+        if (ctx.Equal() != null) {
+            node = new CAst.EqualNode();
+        } else if (ctx.NotEqual() != null) {
+            node = new CAst.NotEqualNode();
+        } else {
+            node = new CAst.AstNodeBinary();
+        }
+        node.left = visitRelationalExpression(ctx.relationalExpression().get(0));
+        if (ctx.relationalExpression().size() > 1) {
+            node.right = visitRelationalExpression(ctx.relationalExpression().get(1));
+        }
+        return node;
+    }
+
+    @Override
+    public CAst.AstNode visitAndExpression(CParser.AndExpressionContext ctx) {
+        if (ctx.equalityExpression().size() > 1) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "And expression '&' is currently unsupported.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        return visitEqualityExpression(ctx.equalityExpression().get(0));
+    }
 
     @Override
     public CAst.AstNode visitExclusiveOrExpression(CParser.ExclusiveOrExpressionContext ctx) {
