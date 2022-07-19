@@ -7,6 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import example.antlr.CAst.AstNode;
+import example.antlr.CAst.VariableNode;
 import example.antlr.CParser.BlockItemContext;
 import example.antlr.CParser.DeclarationSpecifierContext;
 import example.antlr.CParser.DeclaratorContext;
@@ -178,51 +180,14 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
                 return new CAst.OpaqueNode();
             }
 
-            //// Process the right hand side of the assignment.
-            PrimaryExpressionContext primaryExpr;
-            CAst.AstNode initializerNode;
-            try {
-                // FIXME: This is cutting some corners with interpreting
-                // the program. Currently, inline arithmetic operations
-                // will not be handled and have no warnings at all.
-                // This part needs more work.
-                primaryExpr = initDecl.initializer().assignmentExpression()
-                                .conditionalExpression().logicalOrExpression()
-                                .logicalAndExpression(0).inclusiveOrExpression(0)
-                                .exclusiveOrExpression(0).andExpression(0)
-                                .equalityExpression(0).relationalExpression(0)
-                                .shiftExpression(0).additiveExpression(0)
-                                .multiplicativeExpression(0).castExpression(0)
-                                .unaryExpression().postfixExpression()
-                                .primaryExpression();
-            } catch (NullPointerException e) {
-                System.out.println(String.join(" ", 
-                    "Warning (line " + ctx.getStart().getLine() + "):",
-                    "unable to extract a primary expression from the initializer.",
-                    "Marking the declaration as opaque."
-                ));
-                return new CAst.OpaqueNode();
-            }
-            if (primaryExpr.Identifier() != null) {
-                initializerNode = new CAst.VariableNode(primaryExpr.Identifier().getText());
-            } else if (primaryExpr.Constant() != null) {
-                initializerNode = new CAst.LiteralNode(primaryExpr.Constant().getText());
-            } else {
-                System.out.println(String.join(" ", 
-                    "Warning (line " + ctx.getStart().getLine() + "):",
-                    "only identifier and constant are supported on the RHS of the declaration.",
-                    "Marking the declaration as opaque."
-                ));
-                return new CAst.OpaqueNode();
-            }
-
             // Finally return the assignment node.
             CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
+            CAst.AstNode initNode = visitAssignmentExpression(initDecl.initializer().assignmentExpression());
             assignmentNode.left = variable;
-            assignmentNode.right = initializerNode;
+            assignmentNode.right = initNode;
             return assignmentNode;
         }
-        // Return CAst.OpaqueNode as default.
+        // Return OpaqueNode as default.
         return new CAst.OpaqueNode();
     }
 
@@ -268,62 +233,203 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
     }
 
     @Override
-    public CAst.AstNode visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
-        if (ctx.conditionalExpression() != null) {
-            return visitConditionalExpression(ctx.conditionalExpression());
+    public CAst.AstNode visitPrimaryExpression(CParser.PrimaryExpressionContext ctx) {
+        if (ctx.Identifier() != null) {
+            return new CAst.VariableNode(ctx.Identifier().getText());
+        } else if (ctx.Constant() != null) {
+            return new CAst.LiteralNode(ctx.Constant().getText());
+        } 
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "only identifier and constant are supported in a primary expression.",
+            "Marking the declaration as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }
+
+    // FIXME: More checks needed. This implementation currently silently omit
+    // certain cases, such as arr[1].
+    @Override
+    public CAst.AstNode visitPostfixExpression(CParser.PostfixExpressionContext ctx) {
+        if (ctx.PlusPlus().size() > 0
+            || ctx.MinusMinus().size() > 0
+            || ctx.Dot().size() > 0
+            || (ctx.LeftBracket().size() > 0 && ctx.RightBracket().size() > 0)) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Postfix '++', '--', '.', '[]' are currently not supported.",
+                "Marking the statement as opaque."
+            ));
+            return new CAst.OpaqueNode();
         }
-        if (ctx.unaryExpression() != null
-            && ctx.assignmentOperator() != null
-            && ctx.assignmentExpression() != null) {
-            CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
-            assignmentNode.left = visitUnaryExpression(ctx.unaryExpression());
-            assignmentNode.right = visitAssignmentExpression(ctx.assignmentExpression());
-            return assignmentNode;
+        if (ctx.primaryExpression() != null
+            && ctx.Identifier().size() == 1
+            && ctx.Arrow().size() == 1) {
+            // Check state variables on the self struct, ports and actions.
+            AstNode primaryExprNode = visitPrimaryExpression(ctx.primaryExpression());
+            if (primaryExprNode instanceof CAst.LiteralNode) {
+                // Unreachable.
+                System.out.println("Unreachable!");
+                return new CAst.OpaqueNode(); // FIXME: Throw an exception instead.
+            }
+            CAst.VariableNode varNode = (CAst.VariableNode) primaryExprNode;
+            if (varNode.name.equals("self")) {
+                // return a state variable node.
+            } else if (ctx.Identifier().get(0).getText().equals("is_present")) {
+                // return a trigger present node.
+            } else if (ctx.Identifier().get(0).getText().equals("value")) {
+                // return a trigger value node.
+            } else {
+                // Generic pointer dereference, unanalyzable.
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "Generic pointer dereference is not supported in a postfix expression.",
+                    "Marking the declaration as opaque."
+                ));
+                return new CAst.OpaqueNode();
+            }
+        }
+        if (ctx.primaryExpression() != null) {
+            return visitPrimaryExpression(ctx.primaryExpression());
         }
         System.out.println(String.join(" ", 
             "Warning (line " + ctx.getStart().getLine() + "):",
-            "DigitSequence in an assignmentExpression is currently not allowed.",
-            "Marking the expression as opaque."
+            "only an identifier, constant, state variable, port, and action are supported in a primary expression.",
+            "Marking the declaration as opaque."
         ));
         return new CAst.OpaqueNode();
     }
 
     @Override
+    public CAst.AstNode visitUnaryExpression(CParser.UnaryExpressionContext ctx) {
+        if (ctx.PlusPlus().size() > 0
+            || ctx.MinusMinus().size() > 0
+            || ctx.Sizeof().size() > 0) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Prefix '++', '--', and 'sizeof' are currently not supported.",
+                "Marking the statement as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        if (ctx.postfixExpression() != null) {
+            return visitPostfixExpression(ctx.postfixExpression());
+        }
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "only postfixExpression in a unaryExpression is currently supported.",
+            "Marking the statement as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }
+
+    @Override
+    public CAst.AstNode visitCastExpression(CParser.CastExpressionContext ctx) {
+        if (ctx.unaryExpression() != null) {
+            return visitUnaryExpression(ctx.unaryExpression());
+        }
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "only unaryExpression in a castExpression is currently supported.",
+            "Marking the statement as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }
+
+    @Override
+    public CAst.AstNode visitMultiplicativeExpression(CParser.MultiplicativeExpressionContext ctx) {
+        if (ctx.castExpression().size() > 1) {
+            CAst.AstNodeBinary node;
+            if (ctx.Star() != null) {
+                node = new CAst.MultiplicationNode();
+            } else if (ctx.Div() != null) {
+                node = new CAst.DivisionNode();
+            } else if (ctx.Mod() != null) {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "Mod expression '%' is currently unsupported.",
+                    "Marking the expression as opaque."
+                ));
+                return new CAst.OpaqueNode();
+            } else {
+                node = new CAst.AstNodeBinary();
+            }
+            node.left = visitCastExpression(ctx.castExpression().get(0));
+            node.right = visitCastExpression(ctx.castExpression().get(1));
+            return node;
+        }
+        return visitCastExpression(ctx.castExpression().get(0));
+    }
+
+    @Override
+    public CAst.AstNode visitAdditiveExpression(CParser.AdditiveExpressionContext ctx) {
+        if (ctx.multiplicativeExpression().size() > 1) {
+            CAst.AstNodeBinary node;
+            if (ctx.Plus() != null) {
+                node = new CAst.AdditionNode();
+            } else if (ctx.Minus() != null) {
+                node = new CAst.SubtractionNode();
+            } else {
+                node = new CAst.AstNodeBinary();
+            }
+            node.left = visitMultiplicativeExpression(ctx.multiplicativeExpression().get(0));
+            node.right = visitMultiplicativeExpression(ctx.multiplicativeExpression().get(1));
+            return node;
+        }
+        return visitMultiplicativeExpression(ctx.multiplicativeExpression().get(0));
+    }
+
+    @Override
+    public CAst.AstNode visitShiftExpression(CParser.ShiftExpressionContext ctx) {
+        if (ctx.additiveExpression().size() > 1) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Shift expression '<<' or '>>' is currently unsupported.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        return visitAdditiveExpression(ctx.additiveExpression().get(0));
+    }
+
+    @Override
     public CAst.AstNode visitRelationalExpression(CParser.RelationalExpressionContext ctx) {
-        CAst.AstNodeBinary node;
-        if (ctx.Less() != null) {
-            node = new CAst.LessThanNode();
-        } else if (ctx.LessEqual() != null) {
-            node = new CAst.LessEqualNode();
-        } else if (ctx.Greater() != null) { 
-            node = new CAst.GreaterThanNode();
-        } else if (ctx.GreaterEqual() != null) {
-            node = new CAst.GreaterEqualNode();
-        } else {
-            node = new CAst.AstNodeBinary();
-        }
-        node.left = visitShiftExpression(ctx.shiftExpression().get(0));
         if (ctx.shiftExpression().size() > 1) {
+            CAst.AstNodeBinary node;
+            if (ctx.Less() != null) {
+                node = new CAst.LessThanNode();
+            } else if (ctx.LessEqual() != null) {
+                node = new CAst.LessEqualNode();
+            } else if (ctx.Greater() != null) { 
+                node = new CAst.GreaterThanNode();
+            } else if (ctx.GreaterEqual() != null) {
+                node = new CAst.GreaterEqualNode();
+            } else {
+                node = new CAst.AstNodeBinary();
+            }
+            node.left = visitShiftExpression(ctx.shiftExpression().get(0));
             node.right = visitShiftExpression(ctx.shiftExpression().get(1));
+            return node;
         }
-        return node;
+        return visitShiftExpression(ctx.shiftExpression().get(0));
     }
 
     @Override
     public CAst.AstNode visitEqualityExpression(CParser.EqualityExpressionContext ctx) {
-        CAst.AstNodeBinary node;
-        if (ctx.Equal() != null) {
-            node = new CAst.EqualNode();
-        } else if (ctx.NotEqual() != null) {
-            node = new CAst.NotEqualNode();
-        } else {
-            node = new CAst.AstNodeBinary();
-        }
-        node.left = visitRelationalExpression(ctx.relationalExpression().get(0));
         if (ctx.relationalExpression().size() > 1) {
+            CAst.AstNodeBinary node;
+            if (ctx.Equal() != null) {
+                node = new CAst.EqualNode();
+            } else if (ctx.NotEqual() != null) {
+                node = new CAst.NotEqualNode();
+            } else {
+                node = new CAst.AstNodeBinary();
+            }
+            node.left = visitRelationalExpression(ctx.relationalExpression().get(0));
             node.right = visitRelationalExpression(ctx.relationalExpression().get(1));
+            return node;
         }
-        return node;
+        return visitRelationalExpression(ctx.relationalExpression().get(0));
     }
 
     @Override
@@ -367,22 +473,24 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
 
     @Override
     public CAst.AstNode visitLogicalAndExpression(CParser.LogicalAndExpressionContext ctx) {
-        CAst.LogicalAndNode node = new CAst.LogicalAndNode();
-        node.left = visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(0));
         if (ctx.inclusiveOrExpression().size() > 1) {
+            CAst.LogicalAndNode node = new CAst.LogicalAndNode();
+            node.left = visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(0));
             node.right = visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(1));
+            return node;
         }
-        return node;
+        return visitInclusiveOrExpression(ctx.inclusiveOrExpression().get(0));
     }
 
     @Override
     public CAst.AstNode visitLogicalOrExpression(CParser.LogicalOrExpressionContext ctx) {
-        CAst.LogicalOrNode node = new CAst.LogicalOrNode();
-        node.left = visitLogicalAndExpression(ctx.logicalAndExpression().get(0));
         if (ctx.logicalAndExpression().size() > 1) {
+            CAst.LogicalOrNode node = new CAst.LogicalOrNode();
+            node.left = visitLogicalAndExpression(ctx.logicalAndExpression().get(0));
             node.right = visitLogicalAndExpression(ctx.logicalAndExpression().get(1));
+            return node;
         }
-        return node;
+        return visitLogicalAndExpression(ctx.logicalAndExpression().get(0));
     }
 
     @Override
@@ -398,10 +506,25 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
         return visitLogicalOrExpression(ctx.logicalOrExpression());
     }
 
-    
-
     @Override
-    public CAst.AstNode visitUnaryExpression(CParser.UnaryExpressionContext ctx) {
-        return null;
-    }
+    public CAst.AstNode visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
+        if (ctx.conditionalExpression() != null) {
+            return visitConditionalExpression(ctx.conditionalExpression());
+        }
+        if (ctx.unaryExpression() != null
+            && ctx.assignmentOperator() != null
+            && ctx.assignmentExpression() != null) {
+            CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
+            assignmentNode.left = visitUnaryExpression(ctx.unaryExpression());
+            assignmentNode.right = visitAssignmentExpression(ctx.assignmentExpression());
+            return assignmentNode;
+        }
+        System.out.println(String.join(" ", 
+            "Warning (line " + ctx.getStart().getLine() + "):",
+            "DigitSequence in an assignmentExpression is currently not allowed.",
+            "Marking the expression as opaque."
+        ));
+        return new CAst.OpaqueNode();
+    }    
+
 }

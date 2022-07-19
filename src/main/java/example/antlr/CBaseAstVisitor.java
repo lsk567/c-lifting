@@ -67,6 +67,7 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 
 	@Override
 	public T visitLiteralNode(CAst.LiteralNode node) {
+		System.out.print("[visitLiteralNode] ");
 		System.out.println("Hi, I am " + node + " with literal " + node.literal);
 		return null;
 	}
@@ -97,6 +98,7 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 
 	@Override
 	public T visitVariableNode(CAst.VariableNode node) {
+		System.out.print("[visitVariableNode] ");
 		System.out.println("Hi, I am " + node + ": (" + node.type + ", " + node.name + ")");
 		return null;
 	}

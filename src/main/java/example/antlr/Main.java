@@ -20,7 +20,7 @@ public class Main {
 
         try {
             // Generate a parse tree.
-            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/decls.c"));
+            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/arith.c"));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CParser parser = new CParser(tokens);
             BlockItemListContext parseTree = parser.blockItemList();
@@ -30,14 +30,15 @@ public class Main {
             CAst.AstNode ast = buildAstVisitor.visitBlockItemList(parseTree);
 
             // Convert the AST to If Normal Form (INF).
-            IfNormalFormAstVisitor infVisitor = new IfNormalFormAstVisitor();
-            infVisitor.visit(ast, new ArrayList<CAst.AstNode>());
-            CAst.StatementSequenceNode inf = infVisitor.INF;
-            System.out.println(inf);
+            // IfNormalFormAstVisitor infVisitor = new IfNormalFormAstVisitor();
+            // infVisitor.visit(ast, new ArrayList<CAst.AstNode>());
+            // CAst.StatementSequenceNode inf = infVisitor.INF;
+            // System.out.println(inf);
 
             // Traverse and print.
             CBaseAstVisitor baseVisitor = new CBaseAstVisitor<>(); // For pretty printing.
-            baseVisitor.visit(inf);
+            // baseVisitor.visit(inf);
+            baseVisitor.visit(ast);
         } catch (IOException e) {
             System.out.println(e);
         }
