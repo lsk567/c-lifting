@@ -22,7 +22,11 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	public T visitAstNodeUnary(CAst.AstNodeUnary node) {
 		System.out.print("[visitAstNodeUnary] ");
 		System.out.println("Hi, I am " + node);
-		T result = visit(node.child);
+		if (node.child != null) {
+			T result = visit(node.child);
+		} else {
+			System.out.println("*** Child is empty in " + node + "!");
+		}
 		return null;
 	}
 
@@ -30,8 +34,12 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	public T visitAstNodeBinary(CAst.AstNodeBinary node) {
 		System.out.print("[visitAstNodeBinary] ");
 		System.out.println("Hi, I am " + node);
-		T leftResult = visit(node.left);
-		T rightResult = visit(node.right);
+		if (node.left != null) {
+			T leftResult = visit(node.left);
+		} else System.out.println("*** Left child is empty in " + node + "!");
+		if (node.right != null) {
+			T rightResult = visit(node.right);
+		} else System.out.println("*** Right child is empty in " + node + "!");
 		// Aggregate results...
 		return null;
 	}
@@ -191,6 +199,27 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 		return visitAstNodeDynamic(node);
 	}
 
+	@Override
+	public T visitStateVarNode(CAst.StateVarNode node) {
+		System.out.print("[visitStateVarNode] ");
+		System.out.println("Hi, I am " + node + ": (" + node.name + ")");
+		return null;
+	}
+
+	@Override
+	public T visitTriggerValueNode(CAst.TriggerValueNode node) {
+		System.out.print("[visitTriggerValueNode] ");
+		System.out.println("Hi, I am " + node + ": (" + node.name + ")");
+		return null;
+	}
+
+	@Override
+	public T visitTriggerIsPresentNode(CAst.TriggerIsPresentNode node) {
+		System.out.print("[visitTriggerIsPresentNode] ");
+		System.out.println("Hi, I am " + node + ": (" + node.name + ")");
+		return null;
+	}
+
 	//// With one more parameter.
 	@Override
 	public T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList) {
@@ -321,6 +350,21 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	@Override
 	public T visitScheduleActionNode(CAst.ScheduleActionNode node, List<CAst.AstNode> nodeList) {
 		return visitScheduleActionNode(node);
+	}
+
+	@Override
+	public T visitStateVarNode(CAst.StateVarNode node, List<CAst.AstNode> nodeList) {
+		return visitStateVarNode(node);
+	}
+
+	@Override
+	public T visitTriggerValueNode(CAst.TriggerValueNode node, List<CAst.AstNode> nodeList) {
+		return visitTriggerValueNode(node);
+	}
+
+	@Override
+	public T visitTriggerIsPresentNode(CAst.TriggerIsPresentNode node, List<CAst.AstNode> nodeList) {
+		return visitTriggerIsPresentNode(node);
 	}
 
 }

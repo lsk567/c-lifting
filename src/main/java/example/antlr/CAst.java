@@ -287,4 +287,52 @@ public class CAst {
             return ((CAstVisitor<? extends T>)visitor).visitScheduleActionNode(this, nodeList);
         }
     }
+
+    /**
+     * Handle state variables appearing as self-><name>
+     */
+    public static class StateVarNode extends AstNode implements Visitable {
+        public String name;
+        public StateVarNode(String name) {
+            this.name = name;
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitStateVarNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitStateVarNode(this, nodeList);
+        }
+    }
+
+    /**
+     * Handle trigger values appearing as <name>->value
+     */
+    public static class TriggerValueNode extends AstNode implements Visitable {
+        public String name;
+        public TriggerValueNode(String name) {
+            this.name = name;
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitTriggerValueNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitTriggerValueNode(this, nodeList);
+        }
+    }
+
+    /**
+     * Handle trigger presence appearing as <name>->is_present
+     */
+    public static class TriggerIsPresentNode extends AstNode implements Visitable {
+        public String name;
+        public TriggerIsPresentNode(String name) {
+            this.name = name;
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitTriggerIsPresentNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitTriggerIsPresentNode(this, nodeList);
+        }
+    }
 }

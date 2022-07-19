@@ -33,6 +33,9 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 
 	T visitSetPortNode(CAst.SetPortNode node);
 	T visitScheduleActionNode(CAst.ScheduleActionNode node);
+	T visitStateVarNode(CAst.StateVarNode node);
+	T visitTriggerValueNode(CAst.TriggerValueNode node);
+	T visitTriggerIsPresentNode(CAst.TriggerIsPresentNode node);
 
 	/** Used for converting an AST into If Normal Form. */
 	T visitAstNode(CAst.AstNode node, List<CAst.AstNode> nodeList);
@@ -63,5 +66,7 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 
 	T visitSetPortNode(CAst.SetPortNode node, List<CAst.AstNode> nodeList);
 	T visitScheduleActionNode(CAst.ScheduleActionNode node, List<CAst.AstNode> nodeList);
-
+	T visitStateVarNode(CAst.StateVarNode node, List<CAst.AstNode> nodeList);
+	T visitTriggerValueNode(CAst.TriggerValueNode node, List<CAst.AstNode> nodeList);
+	T visitTriggerIsPresentNode(CAst.TriggerIsPresentNode node, List<CAst.AstNode> nodeList);
 }

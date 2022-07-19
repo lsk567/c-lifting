@@ -20,7 +20,7 @@ public class Main {
 
         try {
             // Generate a parse tree.
-            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/if.c"));
+            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/lf_builtin.c"));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CParser parser = new CParser(tokens);
             BlockItemListContext parseTree = parser.blockItemList();

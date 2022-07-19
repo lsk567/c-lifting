@@ -276,10 +276,13 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
             CAst.VariableNode varNode = (CAst.VariableNode) primaryExprNode;
             if (varNode.name.equals("self")) {
                 // return a state variable node.
+                return new CAst.StateVarNode(ctx.Identifier().get(0).getText());
             } else if (ctx.Identifier().get(0).getText().equals("is_present")) {
                 // return a trigger present node.
+                return new CAst.TriggerValueNode(varNode.name);
             } else if (ctx.Identifier().get(0).getText().equals("value")) {
                 // return a trigger value node.
+                return new CAst.TriggerIsPresentNode(varNode.name);
             } else {
                 // Generic pointer dereference, unanalyzable.
                 System.out.println(String.join(" ", 
@@ -318,8 +321,8 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
                 return node;
             } else if (varNode.name.equals("lf_schedule")) {
                 // return a set port node.
-                if (ctx.argumentExpressionList().size() != 2
-                    && ctx.argumentExpressionList().size() != 3) {
+                if (params.size() != 2
+                    && params.size() != 3) {
                     System.out.println(String.join(" ", 
                         "Warning (line " + ctx.getStart().getLine() + "):",
                         "lf_schedule must have 2 or 3 arguments. Detected " + ctx.argumentExpressionList().size(),
@@ -472,9 +475,10 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
     public CAst.AstNode visitEqualityExpression(CParser.EqualityExpressionContext ctx) {
         if (ctx.relationalExpression().size() > 1) {
             CAst.AstNodeBinary node;
-            if (ctx.Equal() != null) {
+            if (ctx.Equal().size() > 0) {
                 node = new CAst.EqualNode();
-            } else if (ctx.NotEqual() != null) {
+            }
+            else if (ctx.NotEqual().size() > 0) {
                 node = new CAst.NotEqualNode();
             } else {
                 node = new CAst.AstNodeBinary();
