@@ -182,13 +182,13 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	@Override
 	public T visitSetPortNode(CAst.SetPortNode node) {
 		System.out.print("[visitSetPortNode] ");
-		return visitAstNode(node);
+		return visitAstNodeBinary(node);
 	}
 
 	@Override
 	public T visitScheduleActionNode(CAst.ScheduleActionNode node) {
 		System.out.print("[visitScheduleActionNode] ");
-		return visitAstNode(node);
+		return visitAstNodeDynamic(node);
 	}
 
 	//// With one more parameter.

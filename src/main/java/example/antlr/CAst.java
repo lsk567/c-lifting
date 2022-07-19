@@ -261,14 +261,11 @@ public class CAst {
     }
 
     /** LF built-in operations */
-
-    public static class SetPortNode extends AstNode implements Visitable {
-        public AstNode port; // self struct variable access is a postfixExpression.
-        public AstNode value; // Could be literal, variable, or pointer.
-        public SetPortNode(AstNode port, AstNode value) {
-            this.port = port;
-            this.value = value;
-        }
+    /**
+     * AST node for an lf_set call. The left child is the port being set.
+     * The right node is the value of the port.
+     */
+    public static class SetPortNode extends AstNodeBinary implements Visitable {
         @Override public <T> T accept(AstVisitor<? extends T> visitor) {
             return ((CAstVisitor<? extends T>)visitor).visitSetPortNode(this);
         }
@@ -277,15 +274,12 @@ public class CAst {
         }
     }
 
-    public static class ScheduleActionNode extends AstNode implements Visitable {
-        public AstNode action; // self struct variable access is a postfixExpression.
-        public AstNode value; // Could be literal, variable, or pointer.
-        public AstNode additionalDelay;
-        public ScheduleActionNode(AstNode action, AstNode value, AstNode additionalDelay) {
-            this.action = action;
-            this.value = value;
-            this.additionalDelay = additionalDelay;
-        }
+    /**
+     * action; // self struct variable access is a postfixExpression.
+     * value; // Could be literal, variable, or pointer.
+     * additionalDelay;
+     */
+    public static class ScheduleActionNode extends AstNodeDynamic implements Visitable {
         @Override public <T> T accept(AstVisitor<? extends T> visitor) {
             return ((CAstVisitor<? extends T>)visitor).visitScheduleActionNode(this);
         }

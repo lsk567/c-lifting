@@ -2,7 +2,7 @@ int i = 0;
 i = i + 1;
 if (1 < 2) {
 	i += 1;
-	set(out, i);
+	lf_set(out, i);
 } else {
-	set(out, 0);
+	lf_set(out, 0);
 }

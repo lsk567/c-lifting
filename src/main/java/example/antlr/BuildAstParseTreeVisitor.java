@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import example.antlr.CAst.AstNode;
 import example.antlr.CAst.VariableNode;
+import example.antlr.CParser.AssignmentExpressionContext;
 import example.antlr.CParser.BlockItemContext;
 import example.antlr.CParser.DeclarationSpecifierContext;
 import example.antlr.CParser.DeclaratorContext;
@@ -262,10 +263,10 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
             ));
             return new CAst.OpaqueNode();
         }
+        // State variables on the self struct, ports and actions.
         if (ctx.primaryExpression() != null
             && ctx.Identifier().size() == 1
             && ctx.Arrow().size() == 1) {
-            // Check state variables on the self struct, ports and actions.
             AstNode primaryExprNode = visitPrimaryExpression(ctx.primaryExpression());
             if (primaryExprNode instanceof CAst.LiteralNode) {
                 // Unreachable.
@@ -289,6 +290,59 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
                 return new CAst.OpaqueNode();
             }
         }
+        // LF built-in function calls (set or schedule)
+        if (ctx.primaryExpression() != null
+            && ctx.argumentExpressionList().size() == 1
+            && ctx.LeftParen() != null && ctx.RightParen() != null) {
+            AstNode primaryExprNode = visitPrimaryExpression(ctx.primaryExpression());
+            List<CParser.AssignmentExpressionContext> params = ctx.argumentExpressionList().get(0).assignmentExpression();
+            if (primaryExprNode instanceof CAst.LiteralNode) {
+                // Unreachable.
+                System.out.println("Unreachable!");
+                return new CAst.OpaqueNode(); // FIXME: Throw an exception instead.
+            }
+            CAst.VariableNode varNode = (CAst.VariableNode) primaryExprNode;
+            if (varNode.name.equals("lf_set")) {
+                // return a set port node.
+                if (params.size() != 2) {
+                    System.out.println(String.join(" ", 
+                        "Warning (line " + ctx.getStart().getLine() + "):",
+                        "lf_set must have 2 arguments. Detected " + ctx.argumentExpressionList().size(),
+                        "Marking the function call as opaque."
+                    ));
+                    return new CAst.OpaqueNode();
+                }
+                CAst.SetPortNode node = new CAst.SetPortNode();
+                node.left = visitAssignmentExpression(params.get(0));
+                node.right = visitAssignmentExpression(params.get(1));
+                return node;
+            } else if (varNode.name.equals("lf_schedule")) {
+                // return a set port node.
+                if (ctx.argumentExpressionList().size() != 2
+                    && ctx.argumentExpressionList().size() != 3) {
+                    System.out.println(String.join(" ", 
+                        "Warning (line " + ctx.getStart().getLine() + "):",
+                        "lf_schedule must have 2 or 3 arguments. Detected " + ctx.argumentExpressionList().size(),
+                        "Marking the function call as opaque."
+                    ));
+                    return new CAst.OpaqueNode();
+                }
+                CAst.ScheduleActionNode node = new CAst.ScheduleActionNode();
+                for (CParser.AssignmentExpressionContext param : params) {
+                    node.children.add(visitAssignmentExpression(param));
+                }
+                return node;
+            } else {
+                // Generic pointer dereference, unanalyzable.
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "Generic pointer dereference is not supported in a postfix expression.",
+                    "Marking the declaration as opaque."
+                ));
+                return new CAst.OpaqueNode();
+            }
+        }
+        // Variable or literal
         if (ctx.primaryExpression() != null) {
             return visitPrimaryExpression(ctx.primaryExpression());
         }
@@ -512,19 +566,72 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
             return visitConditionalExpression(ctx.conditionalExpression());
         }
         if (ctx.unaryExpression() != null
-            && ctx.assignmentOperator() != null
             && ctx.assignmentExpression() != null) {
-            CAst.AssignmentNode assignmentNode = new CAst.AssignmentNode();
+            CAst.AstNodeBinary assignmentNode = new CAst.AssignmentNode();
             assignmentNode.left = visitUnaryExpression(ctx.unaryExpression());
-            assignmentNode.right = visitAssignmentExpression(ctx.assignmentExpression());
+            if (ctx.assignmentOperator().getText().equals("=")) {
+                assignmentNode.right = visitAssignmentExpression(ctx.assignmentExpression());
+            }
+            else if (ctx.assignmentOperator().getText().equals("+=")) {
+                CAst.AdditionNode subnode = new CAst.AdditionNode();
+                subnode.left = visitUnaryExpression(ctx.unaryExpression());
+                subnode.right = visitAssignmentExpression(ctx.assignmentExpression());
+                assignmentNode.right = subnode;
+            }
+            else if (ctx.assignmentOperator().getText().equals("-=")) {
+                CAst.SubtractionNode subnode = new CAst.SubtractionNode();
+                subnode.left = visitUnaryExpression(ctx.unaryExpression());
+                subnode.right = visitAssignmentExpression(ctx.assignmentExpression());
+                assignmentNode.right = subnode;
+            }
+            else if (ctx.assignmentOperator().getText().equals("*=")) {
+                CAst.MultiplicationNode subnode = new CAst.MultiplicationNode();
+                subnode.left = visitUnaryExpression(ctx.unaryExpression());
+                subnode.right = visitAssignmentExpression(ctx.assignmentExpression());
+                assignmentNode.right = subnode;
+            }
+            else if (ctx.assignmentOperator().getText().equals("/=")) {
+                CAst.DivisionNode subnode = new CAst.DivisionNode();
+                subnode.left = visitUnaryExpression(ctx.unaryExpression());
+                subnode.right = visitAssignmentExpression(ctx.assignmentExpression());
+                assignmentNode.right = subnode;
+            }
+            else {
+                System.out.println(String.join(" ", 
+                    "Warning (line " + ctx.getStart().getLine() + "):",
+                    "Only '=', '+=', '-=', '*=', '/=' assignment operators are supported.",
+                    "Marking the expression as opaque."
+                ));
+                return new CAst.OpaqueNode();
+            }
             return assignmentNode;
         }
         System.out.println(String.join(" ", 
             "Warning (line " + ctx.getStart().getLine() + "):",
-            "DigitSequence in an assignmentExpression is currently not allowed.",
+            "DigitSequence in an assignmentExpression is currently not supported.",
             "Marking the expression as opaque."
         ));
         return new CAst.OpaqueNode();
-    }    
+    }
 
+    @Override
+    public CAst.AstNode visitSelectionStatement(CParser.SelectionStatementContext ctx) {
+        if (ctx.Switch() != null) {
+            System.out.println(String.join(" ", 
+                "Warning (line " + ctx.getStart().getLine() + "):",
+                "Switch case statement is currently not supported.",
+                "Marking the expression as opaque."
+            ));
+            return new CAst.OpaqueNode();
+        }
+        CAst.IfBlockNode ifBlockNode =  new CAst.IfBlockNode();
+        CAst.IfBodyNode ifBodyNode =  new CAst.IfBodyNode();
+        ifBlockNode.left = visitExpression(ctx.expression());
+        ifBlockNode.right = ifBodyNode;
+        ifBodyNode.left = visitStatement(ctx.statement().get(0));
+        if (ctx.statement().size() > 1) {
+            ifBodyNode.right = visitStatement(ctx.statement().get(1));
+        }
+        return ifBlockNode;
+    }
 }
