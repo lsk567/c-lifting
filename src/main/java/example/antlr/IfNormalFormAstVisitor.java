@@ -1,5 +1,6 @@
 package example.antlr;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +22,8 @@ import java.util.List;
  * 2. Due to the above limitation, the implementation assumes
  *    that each variable has a unique name.
  *    E.g. "{ int i = 0; }{ int i = 0; }" is an ill-formed program.
+ * 
+ * In this program, visit() is the normalise() in the paper.
  */
 public class IfNormalFormAstVisitor extends CBaseAstVisitor<Void> {
 
@@ -37,33 +40,42 @@ public class IfNormalFormAstVisitor extends CBaseAstVisitor<Void> {
 
     @Override
     public Void visitAssignmentNode(CAst.AssignmentNode node, List<CAst.AstNode> conditions) {
-        CAst.IfBlockNode ifNode = new CAst.IfBlockNode();
+        this.INF.children.add(generateIfBlock(node, conditions));
+        return null;
+    }
 
-        // Set the condition of the if block node.
-        CAst.AstNode conjunction = takeConjunction(conditions);
-        ifNode.setCondition(conjunction);
+    @Override
+    public Void visitSetPortNode(CAst.SetPortNode node, List<CAst.AstNode> conditions) {
+        this.INF.children.add(generateIfBlock(node, conditions));
+        return null;
+    }
 
-        // Create a new body node.
-        CAst.IfBodyNode body = new CAst.IfBodyNode();
-        ifNode.right = body;
+	@Override
+	public Void visitScheduleActionNode(CAst.ScheduleActionNode node, List<CAst.AstNode> conditions) {
+		this.INF.children.add(generateIfBlock(node, conditions));
+        return null;
+	}
 
-        // Set the then branch to the assignment.
-        body.left = node;
-
-        // Set the else branch to an EMPTY ast node.
-        body.right = new CAst.AstNode();
-
-        // Add the body to the INF node.
-        this.INF.children.add(ifNode);
-
-        System.out.println("Add a new IfNode: " + ifNode);
+    @Override
+    public Void visitIfBlockNode(CAst.IfBlockNode node, List<CAst.AstNode> conditions) {
+        List<CAst.AstNode> leftConditions = new ArrayList<>(conditions);
+        leftConditions.add(node.left);
+        visit(((CAst.IfBodyNode)node.right).left, leftConditions);
+        if (((CAst.IfBodyNode)node.right).right != null) {
+            List<CAst.AstNode> rightConditions = new ArrayList<>(conditions);
+            // Add a not node.
+            CAst.LogicalNotNode notNode = new CAst.LogicalNotNode();
+            notNode.child = node.left; // Negate the condition.
+            rightConditions.add(notNode);
+            visit(((CAst.IfBodyNode)node.right).right, rightConditions);
+        }
         return null;
     }
 
     private CAst.AstNode takeConjunction(List<CAst.AstNode> conditions) {
         if (conditions.size() == 0) {
             return new CAst.LiteralNode("true");
-        } else if (conditions.size() == 0) {
+        } else if (conditions.size() == 1) {
             return conditions.get(0);
         } else {
             // Take the conjunction of all the conditions.
@@ -80,5 +92,20 @@ public class IfNormalFormAstVisitor extends CBaseAstVisitor<Void> {
             }
             return top;
         }
+    }
+
+    private CAst.IfBlockNode generateIfBlock(CAst.AstNode node, List<CAst.AstNode> conditions) {
+        // Create an If Block node.
+        CAst.IfBlockNode ifNode = new CAst.IfBlockNode();
+        // Set the condition of the if block node.
+        CAst.AstNode conjunction = takeConjunction(conditions);
+        ifNode.left = conjunction;
+        // Create a new body node.
+        CAst.IfBodyNode body = new CAst.IfBodyNode();
+        ifNode.right = body;
+        // Set the then branch to the assignment.
+        body.left = node;
+
+        return ifNode;
     }
 }

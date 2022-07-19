@@ -13,6 +13,7 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitIfBlockNode(CAst.IfBlockNode node);
 	T visitIfBodyNode(CAst.IfBodyNode node);
 	T visitLiteralNode(CAst.LiteralNode node);
+	T visitLogicalNotNode(CAst.LogicalNotNode node);
 	T visitLogicalAndNode(CAst.LogicalAndNode node);
 	T visitLogicalOrNode(CAst.LogicalOrNode node);
 	T visitOpaqueNode(CAst.OpaqueNode node);
@@ -46,6 +47,7 @@ public interface CAstVisitor<T> extends AstVisitor<T> {
 	T visitIfBlockNode(CAst.IfBlockNode node, List<CAst.AstNode> nodeList);
 	T visitIfBodyNode(CAst.IfBodyNode node, List<CAst.AstNode> nodeList);
 	T visitLiteralNode(CAst.LiteralNode node, List<CAst.AstNode> nodeList);
+	T visitLogicalNotNode(CAst.LogicalNotNode node, List<CAst.AstNode> nodeList);
 	T visitLogicalAndNode(CAst.LogicalAndNode node, List<CAst.AstNode> nodeList);
 	T visitLogicalOrNode(CAst.LogicalOrNode node, List<CAst.AstNode> nodeList);
 	T visitOpaqueNode(CAst.OpaqueNode node, List<CAst.AstNode> nodeList);

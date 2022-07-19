@@ -82,13 +82,16 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
                 Arrays.asList(
                     "int",
                     "long",
-                    "double"
+                    "double",
+                    "_Bool"
                 )
             );
             if (declSpec.typeSpecifier().Int() != null
                 || declSpec.typeSpecifier().Long() != null
                 || declSpec.typeSpecifier().Double() != null) 
                 type = CAst.VariableNode.Type.INT;
+            else if (declSpec.typeSpecifier().Bool() != null)
+                type = CAst.VariableNode.Type.BOOLEAN;
             // Mark the declaration unanalyzable if the type is unsupported.
             else {
                 System.out.println(String.join(" ", 
@@ -239,10 +242,12 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
             return new CAst.VariableNode(ctx.Identifier().getText());
         } else if (ctx.Constant() != null) {
             return new CAst.LiteralNode(ctx.Constant().getText());
-        } 
+        }  else if (ctx.expression() != null) {
+            return visitExpression(ctx.expression());
+        }
         System.out.println(String.join(" ", 
             "Warning (line " + ctx.getStart().getLine() + "):",
-            "only identifier and constant are supported in a primary expression.",
+            "only identifier, constant, and expressions are supported in a primary expression.",
             "Marking the declaration as opaque."
         ));
         return new CAst.OpaqueNode();
@@ -372,9 +377,16 @@ public class BuildAstParseTreeVisitor extends CBaseVisitor<CAst.AstNode> {
         if (ctx.postfixExpression() != null) {
             return visitPostfixExpression(ctx.postfixExpression());
         }
+        if (ctx.unaryOperator() != null
+            && ctx.unaryOperator().Not() != null
+            && ctx.castExpression() != null) {
+            CAst.LogicalNotNode node = new CAst.LogicalNotNode();
+            node.child = visitCastExpression(ctx.castExpression());
+            return node;
+        }
         System.out.println(String.join(" ", 
             "Warning (line " + ctx.getStart().getLine() + "):",
-            "only postfixExpression in a unaryExpression is currently supported.",
+            "only postfixExpression and '!' in a unaryExpression is currently supported.",
             "Marking the statement as opaque."
         ));
         return new CAst.OpaqueNode();

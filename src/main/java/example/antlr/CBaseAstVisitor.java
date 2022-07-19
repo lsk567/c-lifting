@@ -81,6 +81,12 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	}
 
 	@Override
+	public T visitLogicalNotNode(CAst.LogicalNotNode node) {
+		System.out.print("[visitLogicalNotNode] ");
+		return visitAstNodeUnary(node);
+	}
+
+	@Override
 	public T visitLogicalAndNode(CAst.LogicalAndNode node) {
 		System.out.print("[visitLogicalAndNode] ");
 		return visitAstNodeBinary(node);
@@ -259,6 +265,11 @@ public class CBaseAstVisitor<T> extends AbstractAstVisitor<T> implements CAstVis
 	@Override
 	public T visitLiteralNode(CAst.LiteralNode node, List<CAst.AstNode> nodeList) {
 		return visitLiteralNode(node);
+	}
+
+	@Override
+	public T visitLogicalNotNode(CAst.LogicalNotNode node, List<CAst.AstNode> nodeList) {
+		return visitLogicalNotNode(node);
 	}
 
 	@Override

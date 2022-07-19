@@ -60,12 +60,6 @@ public class CAst {
      * The right node is the if body.
      */
     public static class IfBlockNode extends AstNodeBinary implements Visitable {
-        public AstNode getCondition() {
-            return this.left;
-        }
-        public void setCondition(AstNode node) {
-            this.left = node;
-        }
         @Override public <T> T accept(AstVisitor<? extends T> visitor) {
             return ((CAstVisitor<? extends T>)visitor).visitIfBlockNode(this);
         }
@@ -99,6 +93,15 @@ public class CAst {
         }
         @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
             return ((CAstVisitor<? extends T>)visitor).visitLiteralNode(this, nodeList);
+        }
+    }
+
+    public static class LogicalNotNode extends AstNodeUnary implements Visitable {
+        @Override public <T> T accept(AstVisitor<? extends T> visitor) {
+            return ((CAstVisitor<? extends T>)visitor).visitLogicalNotNode(this);
+        }
+        @Override public <T> T accept(AstVisitor<? extends T> visitor, List<AstNode> nodeList) {
+            return ((CAstVisitor<? extends T>)visitor).visitLogicalNotNode(this, nodeList);
         }
     }
 

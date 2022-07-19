@@ -20,7 +20,7 @@ public class Main {
 
         try {
             // Generate a parse tree.
-            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/lf_builtin.c"));
+            CLexer lexer = new CLexer(CharStreams.fromFileName("examples/if.c"));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CParser parser = new CParser(tokens);
             BlockItemListContext parseTree = parser.blockItemList();
@@ -29,16 +29,20 @@ public class Main {
             BuildAstParseTreeVisitor buildAstVisitor = new BuildAstParseTreeVisitor();
             CAst.AstNode ast = buildAstVisitor.visitBlockItemList(parseTree);
 
-            // Convert the AST to If Normal Form (INF).
-            // IfNormalFormAstVisitor infVisitor = new IfNormalFormAstVisitor();
-            // infVisitor.visit(ast, new ArrayList<CAst.AstNode>());
-            // CAst.StatementSequenceNode inf = infVisitor.INF;
-            // System.out.println(inf);
-
             // Traverse and print.
             CBaseAstVisitor baseVisitor = new CBaseAstVisitor<>(); // For pretty printing.
-            // baseVisitor.visit(inf);
+            System.out.println("***** Printing the original AST.");
             baseVisitor.visit(ast);
+
+            // Convert the AST to If Normal Form (INF).
+            IfNormalFormAstVisitor infVisitor = new IfNormalFormAstVisitor();
+            System.out.println("***** Convert to If Normal Form.");
+            infVisitor.visit(ast, new ArrayList<CAst.AstNode>());
+            CAst.StatementSequenceNode inf = infVisitor.INF;
+            System.out.println(inf);
+            System.out.println("***** Printing the AST in If Normal Form.");
+            baseVisitor.visit(inf);
+
         } catch (IOException e) {
             System.out.println(e);
         }
